@@ -53,7 +53,7 @@ paths:
                 Parameter(s) value too short/long:
                   value: |-
                     {
-                        "error": "Path `(?<parameterName>.+)` \(`(?<sampleValue>.+)`\) is (longer|shorte) than the (maximum|minimum) allowed length \((?<requiredLength>\d+)\)"
+                        "error": "Path `(?<parameterName>.+)` \\(`(?<sampleValue>.+)`\\) is (longer|shorter) than the (maximum|minimum) allowed length \\((?<requiredLength>\\d+)\\)"
                     }
           description: Parameter(s) value too short/long
       operationId: createuser
@@ -77,6 +77,8 @@ paths:
                   username: tere
                   password: qwerty1234
         required: true
+      tags:
+        - sessions
       responses:
         '200':
           description: Successful login
@@ -104,6 +106,8 @@ paths:
       summary: Create a session
       description: Creates a new instance of a `session`.
     delete:
+      tags:
+        - sessions
       responses:
         '204':
           description: Session successfuly deleted
@@ -126,9 +130,63 @@ paths:
                 Invalid token:
                   value:
                     error: Invalid token
+                Missing authorization:
+                  value:
+                    error: Missing authorization
           description: Invalid token
-      summary: Deletes a `session`
+      security:
+        - Bearer: [ ]
+      summary: Deletes a session
       description: Deletes given `session` with an id specified in authorization header
+  /users/current:
+    get:
+      tags:
+        - users
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+              examples:
+                GET /users/current response:
+                  value:
+                    accounts:
+                      - balance: 10000
+                        currency: EUR
+                        name: Main
+                        number: gbhhj3gbfwjc
+                        userId: 616564d44d8d8b977b16e1e4
+                    name: TereMi
+                    username: mina13
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Invalid authorization format:
+                  value:
+                    error: Invalid authorization format
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Missing authorization:
+                  value:
+                    error: Missing authorization
+                Invalid token:
+                  value:
+                    error: Invalid token
+          description: Unauthorized
+      security:
+        - Bearer: [ ]
+      summary: Get active user data
+      description: Returns active `user` data
 components:
   schemas:
     user:
@@ -163,7 +221,13 @@ components:
         token:
           type: string
       example:
-        token: ''
+        token: 6162e76dcc5e898fbab9cfd8
+  securitySchemes:
+    Bearer:
+      scheme: bearer
+      type: http
 tags:
   - name: users
+    description: ''
+  - name: sessions
     description: ''
